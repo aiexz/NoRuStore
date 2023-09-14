@@ -46,7 +46,7 @@ function ResultCard({
           }
           )
       }} className={`p-2`}>
-        <SvgIcon1 className="grow-0 shrink-0 basis-auto box-border w-8 h-8 flex" /> :
+        <SvgIcon1 className="grow-0 shrink-0 basis-auto box-border w-8 h-8 flex" />
       </a>
     </div>
   );
