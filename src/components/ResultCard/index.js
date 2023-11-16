@@ -13,7 +13,8 @@ function ResultCard({
       <div className={`flex justify-end items-start flex-row grow-0 shrink basis-auto box-border mr-[6.75px]`}>
         <div className={`grow-0 shrink-0 basis-auto box-border mr-3.5`}>
           <img
-            className={`w-[75px] h-[75px] max-w-[initial] box-border object-cover block rounded-md border-[none] content-[url('${imageLink}')]`}
+            className={`w-[75px] h-[75px] max-w-[initial] box-border object-cover block rounded-md border-[none]`}
+            src={imageLink}
           />
         </div>
         <p className={`grow-0 shrink basis-auto box-border [font-family:Inter] text-base font-normal text-[black]`}>{name}</p>
