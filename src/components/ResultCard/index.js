@@ -1,57 +1,76 @@
 import { useCallback, useState, forwardRef, useEffect, useContext } from "react";
 import SvgIcon1 from "./icons/SvgIcon1";
-import Modal from 'react-modal';
 
 function ResultCard({
   name,
   imageLink,
   appId
 }) {
-  return (
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [error, setError] = useState(null);
 
-    <div className={`bg-[#d9d9d9] flex justify-between items-center flex-row h-[100px] grow-0 shrink-0 basis-auto box-border px-[6.5px] rounded-md`}>
-      <div className={`flex justify-end items-start flex-row grow-0 shrink basis-auto box-border mr-[6.75px]`}>
-        <div className={`grow-0 shrink-0 basis-auto box-border mr-3.5`}>
+  const handleDownload = () => {
+    setIsDownloading(true);
+    setError(null);
+    
+    fetch(
+      "https://backapi.rustore.ru/applicationData/download-link",
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        method: 'POST',
+        body: JSON.stringify({
+          "appId": appId,
+          "firstInstall": true,
+        })
+      }
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.body && data.body.apkUrl) {
+          window.location.href = data.body.apkUrl;
+        } else {
+          throw new Error("No download link available");
+        }
+      })
+      .catch((err) => {
+        console.error(err);
+        setError("Не удалось скачать приложение");
+      })
+      .finally(() => {
+        setIsDownloading(false);
+      });
+  };
+
+  return (
+    <div className={`bg-white shadow-md hover:shadow-lg transition-shadow duration-300 flex justify-between items-center rounded-lg overflow-hidden`}>
+      <div className={`flex items-center p-3 flex-1`}>
+        <div className={`mr-4 flex-shrink-0`}>
           <img
-            className={`w-[75px] h-[75px] max-w-[initial] box-border object-cover block rounded-md border-[none]`}
+            className={`w-16 h-16 object-cover rounded-md border border-gray-100`}
             src={imageLink}
+            alt={`${name} icon`}
           />
         </div>
-        <p className={`grow-0 shrink basis-auto box-border [font-family:Inter] text-base font-normal text-[black]`}>{name}</p>
+        <div className="flex-1 min-w-0">
+          <h3 className={`text-lg font-medium text-gray-800 truncate`}>{name}</h3>
+          {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+        </div>
       </div>
-      <a onClick={() => {
-        fetch(
-          "https://backapi.rustore.ru/applicationData/download-link",
-          {
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            method: 'POST',
-            body: JSON.stringify({
-              "appId": appId,
-              "firstInstall": true,
-            })
-          }
-        )
-          .then((res) => res.json())
-          .then((data) => {
-            if (data && data.body && data.body.apkUrl) {
-              window.location.href = data.body.apkUrl
-            } else {
-              throw new Error("No results")
-            }
-          })
-          .catch((err) => {
-            console.error(err)
-            throw err
-          }
-          )
-      }} className={`p-2`}>
-        <SvgIcon1 className="grow-0 shrink-0 basis-auto box-border w-8 h-8 flex" />
-      </a>
+      <button 
+        onClick={handleDownload} 
+        disabled={isDownloading}
+        className={`p-4 transition-colors duration-200 h-full flex items-center justify-center`}
+      >
+        {isDownloading ? (
+          <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        ) : (
+          <SvgIcon1 className="w-6 h-6 text-blue-600" />
+        )}
+      </button>
     </div>
   );
 }
-
 
 export default ResultCard;

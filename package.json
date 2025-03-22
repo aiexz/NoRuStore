@@ -1,8 +1,10 @@
 {
   "name": "react-app",
   "scripts": {
+    "tailwind": "tailwindcss -i src/index.css -o public/index.css --watch",
     "dev": "react-scripts start",
-    "build": "react-scripts build"
+    "build": "tailwindcss -i src/index.css -o public/index.css && react-scripts build",
+    "start": "npm run tailwind & react-scripts start"
   },
   "dependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.18.6",

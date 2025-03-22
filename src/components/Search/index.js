@@ -2,59 +2,86 @@ import { useCallback, useState, forwardRef } from "react";
 import ResultCard from "../ResultCard";
 import SvgIcon1 from "./icons/SvgIcon1";
 
-
 function Search() {
   let [searchResults, setSearchResults] = useState([]);
+  let [isLoading, setIsLoading] = useState(false);
+  let [error, setError] = useState(null);
+
+  const handleSearch = (e) => {
+    const query = e.target.value.trim();
+    
+    if (!query) {
+      setSearchResults([]);
+      return;
+    }
+    
+    setIsLoading(true);
+    setError(null);
+    
+    fetch(
+      `https://backapi.rustore.ru/applicationData/apps?pageNumber=0&pageSize=40&query=${query}`
+    )
+      .then((res) => res.json())
+      .then((data) => {
+        if (data && data.body && data.body.content) {
+          setSearchResults(data.body.content.map((app) => ({
+            ...app,
+            key: app.appId
+          })));
+        } else {
+          throw new Error("No results");
+        }
+      })
+      .catch((err) => {
+        if (err.message === "No results") {
+          setSearchResults([]);
+        } else {
+          setError("Ошибка поиска. Пожалуйста, попробуйте еще раз.");
+          console.error(err);
+        }
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
   return (
-    <div className={`flex justify-start items-stretch flex-col gap-5 grow-0 shrink-0 basis-auto box-border mt-[66px]`}>
-      {/* Input Component is detected here. We've generated code using HTML. See other options in "Component library" dropdown in Settings */}
-      <div className={`grow-0 shrink-0 basis-auto box-border bg-[#d9d9d9] h-[50px] flex flex-row items-center [justify-content:start] rounded-md border-[none]`}>
+    <div className={`flex justify-start items-stretch flex-col gap-5 grow-0 shrink-0 basis-auto box-border max-w-3xl w-full mx-auto`}>
+      <div className={`grow-0 shrink-0 basis-auto box-border bg-white shadow-md rounded-lg overflow-hidden flex items-center h-14`}>
         <input
-          placeholder="Tinkoff"
+          placeholder="Введите название приложения..."
           type="text"
-          className={`w-full [font-family:Inter] text-[21px] font-normal bg-transparent [outline:none] box-border [background:none] ml-2.5 border-[none] text-[black]`}
-          onChange={(e) =>
-            e.target.value &&
-            fetch(
-              `https://backapi.rustore.ru/applicationData/apps?pageNumber=0&pageSize=40&query=${e.target.value}`
-            )
-              .then((res) => res.json())
-              .then((data) => {
-                if (data && data.body && data.body.content) {
-                  setSearchResults(data.body.content.map((app) => ({
-                    ...app,
-                    key: app.appId
-                  })))
-                } else {
-                  throw new Error("No results")
-                }
-              })
-              .catch((err) => {
-                if (err.message === "No results") {
-                  setSearchResults([])
-                } else {
-                  console.error(err)
-                  throw err
-                }
-              })
-          }
+          className={`w-full text-lg px-4 py-3 font-medium bg-transparent outline-none border-none text-gray-800 placeholder-gray-400`}
+          onChange={handleSearch}
         />
-        <SvgIcon1 className="w-8 h-8 flex mr-[6.5px] mt-[9.5px] mb-[8.5px]" />
+        <div className="px-4">
+          {isLoading ? (
+            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          ) : (
+            <SvgIcon1 className="w-6 h-6 text-blue-500" />
+          )}
+        </div>
       </div>
 
+      {error && (
+        <div className="text-red-500 text-center py-2">{error}</div>
+      )}
 
-      {/* for each value in search resutls use resultcard */}
-      {
-        searchResults.map((result) => (
-          result.appName &&
-          <ResultCard
-            key={result.appId}
-            name={result.appName}
-            imageLink={result.iconUrl}
-            appId={result.appId}
-          />
-        ))
-      }
+      <div className="flex flex-col gap-4">
+        {searchResults.length > 0 ? (
+          searchResults.map((result) => (
+            result.appName &&
+            <ResultCard
+              key={result.appId}
+              name={result.appName}
+              imageLink={result.iconUrl}
+              appId={result.appId}
+            />
+          ))
+        ) : searchResults.length === 0 && !isLoading && !error ? (
+          <div className="text-center text-gray-500 py-8">Введите запрос для поиска приложений</div>
+        ) : null}
+      </div>
     </div>
   );
 }
