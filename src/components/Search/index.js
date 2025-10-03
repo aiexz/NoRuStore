@@ -47,24 +47,24 @@ function Search() {
 
   return (
     <div className={`flex justify-start items-stretch flex-col gap-5 grow-0 shrink-0 basis-auto box-border max-w-3xl w-full mx-auto`}>
-      <div className={`grow-0 shrink-0 basis-auto box-border bg-white shadow-md rounded-lg overflow-hidden flex items-center h-14`}>
+      <div className={`grow-0 shrink-0 basis-auto box-border bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden flex items-center h-14`}>
         <input
           placeholder="Введите название приложения..."
           type="text"
-          className={`w-full text-lg px-4 py-3 font-medium bg-transparent outline-none border-none text-gray-800 placeholder-gray-400`}
+          className={`w-full text-lg px-4 py-3 font-medium bg-transparent outline-none border-none text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500`}
           onChange={handleSearch}
         />
         <div className="px-4">
           {isLoading ? (
-            <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-6 h-6 border-2 border-blue-500 dark:border-blue-400 border-t-transparent rounded-full animate-spin"></div>
           ) : (
-            <SvgIcon1 className="w-6 h-6 text-blue-500" />
+            <SvgIcon1 className="w-6 h-6 text-blue-500 dark:text-blue-400" />
           )}
         </div>
       </div>
 
       {error && (
-        <div className="text-red-500 text-center py-2">{error}</div>
+        <div className="text-red-500 dark:text-red-400 text-center py-2">{error}</div>
       )}
 
       <div className="flex flex-col gap-4">
@@ -79,7 +79,7 @@ function Search() {
             />
           ))
         ) : searchResults.length === 0 && !isLoading && !error ? (
-          <div className="text-center text-gray-500 py-8">Введите запрос для поиска приложений</div>
+          <div className="text-center text-gray-500 dark:text-gray-400 py-8">Введите запрос для поиска приложений</div>
         ) : null}
       </div>
     </div>
