@@ -8,9 +8,14 @@ function ResultCard({
 }) {
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState(null);
+  const [downloadLink, setDownloadLink] = useState(null);
+  const [isFetchingLink, setIsFetchingLink] = useState(false);
 
-  const handleDownload = () => {
-    setIsDownloading(true);
+  const fetchDownloadLink = useCallback(() => {
+    // Don't fetch if already fetching or already have the link
+    if (isFetchingLink || downloadLink) return;
+    
+    setIsFetchingLink(true);
     setError(null);
     
     fetch(
@@ -29,19 +34,37 @@ function ResultCard({
       .then((res) => res.json())
       .then((data) => {
         if (data && data.body && data.body.apkUrl) {
-          window.location.href = data.body.apkUrl;
+          setDownloadLink(data.body.apkUrl);
         } else {
           throw new Error("No download link available");
         }
       })
       .catch((err) => {
         console.error(err);
-        setError("Не удалось скачать приложение");
+        setError("Не удалось получить ссылку");
       })
       .finally(() => {
-        setIsDownloading(false);
+        setIsFetchingLink(false);
       });
+  }, [appId, isFetchingLink, downloadLink]);
+
+  const handleDownload = (e) => {
+    // If we don't have the link yet, prevent default and fetch it
+    if (!downloadLink) {
+      e.preventDefault();
+      setIsDownloading(true);
+      fetchDownloadLink();
+    }
+    // If we have the link, let the browser handle the navigation
   };
+
+  // When download link is fetched and we're in downloading state, navigate to it
+  useEffect(() => {
+    if (downloadLink && isDownloading) {
+      window.location.href = downloadLink;
+      setIsDownloading(false);
+    }
+  }, [downloadLink, isDownloading]);
 
   return (
     <div className={`bg-white shadow-md hover:shadow-lg transition-shadow duration-300 flex justify-between items-center rounded-lg overflow-hidden`}>
@@ -58,17 +81,24 @@ function ResultCard({
           {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
         </div>
       </div>
-      <button 
-        onClick={handleDownload} 
-        disabled={isDownloading}
-        className={`p-4 transition-colors duration-200 h-full flex items-center justify-center`}
+      <a
+        href={downloadLink || "#"}
+        onClick={handleDownload}
+        onMouseEnter={fetchDownloadLink}
+        onTouchStart={fetchDownloadLink}
+        onFocus={fetchDownloadLink}
+        download
+        className={`p-4 transition-colors duration-200 h-full flex items-center justify-center ${
+          isDownloading ? 'pointer-events-none' : ''
+        }`}
+        aria-label={`Download ${name}`}
       >
-        {isDownloading ? (
+        {isDownloading || isFetchingLink ? (
           <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
         ) : (
           <SvgIcon1 className="w-6 h-6 text-blue-600" />
         )}
-      </button>
+      </a>
     </div>
   );
 }
