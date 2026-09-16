@@ -22,7 +22,8 @@ function ResultCard({
       "https://backapi.rustore.ru/applicationData/download-link",
       {
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          'rustorevercode': '1105001'
         },
         method: 'POST',
         body: JSON.stringify({
